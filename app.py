@@ -49,31 +49,44 @@ CHAPTERS = {
     "第12章 微分方程": {
         "12.1 微分方程的概念": "请讲解微分方程的基本概念，用实际例子引入。",
         "12.2 一阶微分方程": "请分类讲解可分离变量、齐次型、一阶线性微分方程的解法。",
+        "12.3 高阶微分方程": "请讲解高阶微分方程的降阶法和常系数线性微分方程的解法。",
+        "12.4 常系数线性微分方程组": "请讲解消元法解常系数线性微分方程组。",
+        "12.5 微分方程的幂级数解法": "请讲解微分方程的幂级数解法的思想和步骤。",
+        "12.6 微分方程的简单应用": "请用几何、物理、电路等实例讲解微分方程的应用。",
     },
     "第13章 差分方程": {
         "13.1 差分与差分方程的概念": "请讲解差分和差分方程的基本概念。",
+        "13.2 常系数线性差分方程": "请讲解常系数线性差分方程的解法。",
+        "13.3 差分方程应用举例": "请用经济学或生物学例子讲解差分方程的应用。",
     },
 }
 
-# ====== 个性化系统指令 ======
+# ====== 个性化系统指令（增强版） ======
 SYSTEM_PROMPT = """
 你是一位专门适配“图像化 + 理解驱动”型学习者的高等数学导师。
 课程：高等数学（下册），涵盖多元函数微分学、重积分、曲线曲面积分、无穷级数等。
 教学原则：
 1. 讲解任何概念时，必须先用一个生活中的视觉化类比或几何直观描述引入，再给出严格的数学定义。
 2. 用文本描述数学对象的几何形象，尽可能让用户“在脑海中看到画面”。
-3. 在练习模式下，生成需要先理解图形才能作答的题目；批改时用“颜色标记错误步骤”的方式解释。
-4. 所有数学公式和符号必须使用LaTeX格式，并将它们正确地包裹在$$符号中，以便正确渲染。
-5. 【重要】关键数学符号必须书写准确，例如极限符号必须写为 \lim，不能写成中文“令”或错别字“林”；偏导数符号必须写为 \partial，等等。
+3. 所有数学公式和符号必须使用LaTeX格式，并将它们正确地包裹在$$符号中，以便正确渲染。
+4. 【练习模式】当用户要求练习或当前处于练习模式时：
+   - 生成一道需要先理解图形才能作答的题目，并提供一个常见错误选项。
+   - 用户回答后，你必须先判断错误类型：计算错误 / 理解错误（概念混淆或几何意义不清）/ 方法错误（策略选择不当）。
+   - 用“颜色标记错误步骤”的文字方式给出针对性反馈，并指明属于哪种错误类型。
+5. 讲解完一个概念后，必须主动询问：“需要我出一道练习题检验你的理解吗？”或者“这个概念的哪个部分还需要我再解释一遍？”
+6. 如果用户连续两次回答错误，自动切换为“诊断者”角色，分析用户的薄弱点，并用更基础的类比重新讲解。
 请严格遵守以上原则，语言生动形象，条理清晰。
 """
 
 if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
-# ====== 侧边栏：章节导航 ======
+# ====== 侧边栏：章节导航与模式切换 ======
 st.sidebar.title("📚 高数下册知识地图")
 st.sidebar.caption('💡 提示：选择章节后点击按钮，AI 将按照“先类比、再几何、后公式”的原则为你讲解。')
+
+# 模式切换
+mode = st.sidebar.radio("选择模式", ["概念讲解", "练习模式"])
 
 # 选择章
 selected_chapter = st.sidebar.selectbox("选择章", list(CHAPTERS.keys()))
@@ -85,11 +98,20 @@ if selected_chapter:
         list(CHAPTERS[selected_chapter].keys())
     )
 
-# 开始学习按钮
-if st.sidebar.button("🚀 开始图像化学习", type="primary"):
-    prompt_text = CHAPTERS[selected_chapter][selected_section]
-    st.session_state.messages.append({"role": "user", "content": prompt_text})
-    st.rerun()
+# 按钮与触发逻辑
+if mode == "概念讲解":
+    if st.sidebar.button("🚀 开始图像化学习", type="primary"):
+        prompt_text = CHAPTERS[selected_chapter][selected_section]
+        st.session_state.messages.append({"role": "user", "content": prompt_text})
+        st.rerun()
+else:  # 练习模式
+    if st.sidebar.button("📝 生成一道练习题", type="primary"):
+        exercise_prompt = f"请根据{selected_section}的内容，生成一道练习题。要求：1）包含一个常见错误选项；2）用户回答后，你必须诊断错误类型（计算/理解/方法）并用颜色标记方式给出针对性反馈。直接出题，不用讲解概念。"
+        st.session_state.messages.append({"role": "user", "content": exercise_prompt})
+        st.rerun()
+
+st.sidebar.divider()
+st.sidebar.caption("💡 练习模式下，AI 会出题并诊断你的错误类型。")
 
 # ====== 主界面 ======
 st.title("🎨 高数下册图像化学习助手")
