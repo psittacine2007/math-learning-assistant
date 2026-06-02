@@ -1,0 +1,86 @@
+/* ====== 全局字体与排版 ====== */
+body {
+    font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", sans-serif;
+    line-height: 1.8;
+    color: #333;
+}
+
+/* ====== 标题样式 ====== */
+h1 { font-size: 2em; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+h2 { font-size: 1.5em; border-left: 4px solid #3498db; padding-left: 12px; margin-top: 30px; }
+h3 { font-size: 1.2em; color: #2c3e50; margin-top: 20px; }
+
+/* ====== 侧边栏美化 ====== */
+.sidebar {
+    background: #f8f9fa;
+    border-right: 1px solid #e9ecef;
+}
+.sidebar-nav li.active > a {
+    background: #3498db;
+    color: white !important;
+    border-radius: 4px;
+}
+
+/* ====== 内容区域 ====== */
+.markdown-section {
+    max-width: 900px;
+    padding: 20px;
+}
+.markdown-section p {
+    margin: 12px 0;
+}
+
+/* ====== 代码块 ====== */
+.markdown-section pre {
+    background: #f4f6f8;
+    border-radius: 6px;
+    border-left: 4px solid #3498db;
+}
+
+/* ====== 表格 ====== */
+.markdown-section table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 15px 0;
+}
+.markdown-section th {
+    background: #3498db;
+    color: white;
+    padding: 10px;
+}
+.markdown-section td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+/* ====== 引用块 ====== */
+.markdown-section blockquote {
+    background: #f0f8ff;
+    border-left: 4px solid #3498db;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 4px;
+}
+
+/* ====== 数学公式 ====== */
+mjx-container {
+    overflow-x: auto;
+}
+
+/* ====== 链接 ====== */
+.markdown-section a {
+    color: #3498db;
+    text-decoration: none;
+    border-bottom: 1px dotted #3498db;
+}
+.markdown-section a:hover {
+    color: #2980b9;
+    border-bottom: 1px solid #2980b9;
+}
+
+/* ====== 搜索框 ====== */
+.search input {
+    border-radius: 20px;
+    border: 1px solid #ddd;
+    padding: 8px 15px;
+}
