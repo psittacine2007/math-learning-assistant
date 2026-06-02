@@ -84,3 +84,28 @@ mjx-container {
     border: 1px solid #ddd;
     padding: 8px 15px;
 }
+
+/* ====== 侧边栏装饰 ====== */
+
+/* 侧边栏顶部渐变 */
+.sidebar {
+    background: linear-gradient(180deg, #f0f4ff 0%, #f8f9fa 15%);
+}
+
+/* 标题区域装饰 */
+.sidebar > h1:first-child {
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 12px;
+}
+
+/* 在侧边栏底部加一个装饰条 */
+.sidebar::after {
+    content: "🎨 图像化学习 · 理解驱动";
+    display: block;
+    text-align: center;
+    padding: 12px;
+    font-size: 0.8em;
+    color: #999;
+    border-top: 1px solid #e9ecef;
+    margin-top: 20px;
+}
