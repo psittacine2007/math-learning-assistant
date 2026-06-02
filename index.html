@@ -4,19 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎨 高数下册图像化学习助手</title>
-    
-    <!-- Docsify 主题 -->
     <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify/themes/vue.css">
-    
-    <!-- 自定义样式 -->
     <link rel="stylesheet" href="custom.css">
     
-    <!-- KaTeX 样式 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <!-- MathJax 3 配置 -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                packages: {'[+]': ['ams', 'newcommand', 'configmacros']}
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            },
+            loader: {load: ['[tex]/ams']}
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
     <div id="app">加载中...</div>
-    
     <script>
         window.$docsify = {
             name: '🎨 高数下册图像化学习助手',
@@ -28,26 +36,14 @@
                 noData: '没有找到相关内容',
                 depth: 3
             },
-            // 每次页面切换后重新渲染数学公式
+            // 关键：每次页面切换后重新渲染 MathJax
             plugins: [
                 function(hook, vm) {
                     hook.doneEach(function() {
+                        // 等待 DOM 更新后重新渲染
                         setTimeout(function() {
-                            if (typeof renderMathInElement !== 'undefined') {
-                                renderMathInElement(document.getElementById('app'), {
-                                    delimiters: [
-                                        {left: '$$', right: '$$', display: true},
-                                        {left: '$', right: '$', display: false}
-                                    ],
-                                    throwOnError: false,
-                                    strict: false,
-                                    macros: {
-                                        "\\oiint": "\\iint",
-                                        "\\rot": "\\mathrm{rot}",
-                                        "\\div": "\\mathrm{div}",
-                                        "\\grad": "\\mathrm{grad}"
-                                    }
-                                });
+                            if (window.MathJax && window.MathJax.typesetPromise) {
+                                MathJax.typesetPromise();
                             }
                         }, 100);
                     });
@@ -55,17 +51,7 @@
             ]
         }
     </script>
-    
-    <!-- Docsify 核心库 -->
     <script src="//cdn.jsdelivr.net/npm/docsify/lib/docsify.min.js"></script>
-    
-    <!-- 搜索插件 -->
     <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
-    
-    <!-- KaTeX 核心库 -->
-    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-    
-    <!-- KaTeX 自动渲染 -->
-    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
 </body>
 </html>
