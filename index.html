@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify/themes/vue.css">
     <link rel="stylesheet" href="custom.css">
     
-    <!-- KaTeX 样式 -->
+    <!-- KaTeX 样式文件 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
 </head>
 <body>
@@ -22,17 +22,35 @@
                 placeholder: '搜索知识点...',
                 noData: '没有找到相关内容',
                 depth: 3
-            }
+            },
+            // 关键：页面加载完成后重新渲染数学公式
+            plugins: [
+                function(hook, vm) {
+                    hook.doneEach(function() {
+                        // 等待 DOM 更新后渲染
+                        setTimeout(function() {
+                            if (typeof renderMathInElement !== 'undefined') {
+                                renderMathInElement(document.getElementById('app'), {
+                                    delimiters: [
+                                        {left: '$$', right: '$$', display: true},
+                                        {left: '$', right: '$', display: false}
+                                    ],
+                                    throwOnError: false
+                                });
+                            }
+                        }, 100);
+                    });
+                }
+            ]
         }
     </script>
+    <!-- Docsify 核心库 -->
     <script src="//cdn.jsdelivr.net/npm/docsify/lib/docsify.min.js"></script>
+    <!-- 搜索插件 -->
     <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
-    
     <!-- KaTeX 核心库 -->
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <!-- KaTeX 自动渲染插件 -->
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
-    
-    <!-- Docsify 公式渲染插件 -->
-    <script src="https://cdn.jsdelivr.net/npm/docsify-katex/dist/docsify-katex.js"></script>
 </body>
 </html>
