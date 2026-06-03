@@ -88,6 +88,8 @@ from experiments.extrema import show_extrema_experiment
 from experiments.double_integral import show_double_integral_experiment
 from experiments.series_convergence import show_series_experiment
 from experiments.damped_vibration import show_damped_vibration_experiment
+from experiments.green_theorem import show_green_experiment
+from experiments.fourier_series import show_fourier_experiment
 
 # ====== 初始化各模式独立的对话历史 ======
 if "concept_messages" not in st.session_state:
@@ -123,6 +125,8 @@ if mode == "交互实验":
         "二重积分体积演示",
         "级数部分和收敛",
         "阻尼振动"
+        "格林公式（旋度与环量）",
+        "傅里叶级数逼近"
     ])
     if experiment == "方向导数和梯度":
         show_gradient_experiment()
@@ -134,6 +138,10 @@ if mode == "交互实验":
         show_series_experiment()
     elif experiment == "阻尼振动":
         show_damped_vibration_experiment()
+    elif experiment == "格林公式（旋度与环量）":
+         show_green_experiment()
+    elif experiment == "傅里叶级数逼近":
+         show_fourier_experiment()
 
 # ====== 概念讲解模式 ======
 elif mode == "概念讲解":
