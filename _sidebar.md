@@ -45,3 +45,9 @@
   - [13.2 常系数线性差分方程](chapters/13-差分方程/13.2-常系数线性差分方程.md)
   - [13.3 差分方程应用举例](chapters/13-差分方程/13.3-差分方程应用举例.md)
 - 📝 [参考答案](chapters/参考答案.md)
+---
+
+## 🛠️ 实用工具
+
+- [🤖 AI 学习助手 (在线版)](https://math-learning-assistant.streamlit.app/)
+- [💻 项目 GitHub 仓库](https://github.com/psittacine2007/math-learning-assistant)
