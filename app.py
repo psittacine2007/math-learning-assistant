@@ -11,7 +11,7 @@ client = OpenAI(
 )
 MODEL = "deepseek-v4-flash"
 
-# ====== 高数下册章节目录 ======
+# ====== 高数下册章节目录（保持不变） ======
 CHAPTERS = {
     "第8章 多元函数微分学及其应用": {
         "8.1 多元函数的基本概念": "请用图像化方式讲解多元函数的基本概念，包括点集知识、多元函数的定义、极限和连续性。先给生活类比，再给几何直观，最后给定义。",
@@ -61,7 +61,7 @@ CHAPTERS = {
     },
 }
 
-# ====== 个性化系统指令 ======
+# ====== 增强的系统指令（支持 HTML 颜色标记） ======
 SYSTEM_PROMPT = """
 你是一位专门适配"图像化 + 理解驱动"型学习者的高等数学导师。
 课程：高等数学（下册），涵盖多元函数微分学、重积分、曲线曲面积分、无穷级数等。
@@ -72,12 +72,14 @@ SYSTEM_PROMPT = """
 4. 【练习模式】当用户要求练习或当前处于练习模式时：
    - 生成一道需要先理解图形才能作答的题目，并提供一个常见错误选项。
    - 用户回答后，必须先明确标出错误类型，格式为：【错误类型：计算错误/理解错误/方法错误】。
-   - 然后用"颜色标记错误步骤"的文字方式给出针对性反馈。
+   - **重要：必须使用真正的 HTML 颜色标签来突出错误步骤**。例如，错误部分用 `<span style="color:red;">...</span>` 包裹，正确步骤或提示可以用 `<span style="color:green;">...</span>` 或 `<span style="color:blue;">...</span>`。不要只写“请想象用红色标出”，而要实际输出带 style 的 span 标签。
+   - 然后用这些颜色标记给出针对性反馈。
    - 诊断完成后，出一道同类型的新题检验用户是否真正掌握（强化迁移）。
 5. 讲解完一个概念后，必须主动询问："需要我出一道练习题检验你的理解吗？"或者"这个概念的哪个部分还需要我再解释一遍？"
 6. 如果用户连续两次回答错误，自动切换为"诊断者"角色，分析用户的薄弱点，并用更基础的类比重新讲解。
 7. 关键数学符号必须书写准确，例如极限符号必须写为 \\lim，偏导符号写为 \\partial，严禁出现错别字。
-请严格遵守以上原则，语言生动形象，条理清晰。
+
+请严格遵守以上原则，语言生动形象，条理清晰。注意：HTML 标签在 Markdown 中默认会被解析，因此可以直接使用。
 """
 
 # ====== 导入交互实验模块 ======
@@ -87,26 +89,31 @@ from experiments.double_integral import show_double_integral_experiment
 from experiments.series_convergence import show_series_experiment
 from experiments.damped_vibration import show_damped_vibration_experiment
 
-# ====== 会话状态初始化 ======
-if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+# ====== 初始化各模式独立的对话历史 ======
+if "concept_messages" not in st.session_state:
+    st.session_state.concept_messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+if "practice_messages" not in st.session_state:
+    st.session_state.practice_messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+if "experiment_messages" not in st.session_state:
+    st.session_state.experiment_messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
 # ====== 侧边栏：章节导航与模式切换 ======
 st.sidebar.title("📚 高数下册知识地图")
 st.sidebar.caption('💡 提示：选择章节后点击按钮，AI 将按照"先类比、再几何、后公式"的原则为你讲解。')
 
-# 模式切换
 mode = st.sidebar.radio("选择模式", ["概念讲解", "练习模式", "交互实验"])
-
-# 选择章
 selected_chapter = st.sidebar.selectbox("选择章", list(CHAPTERS.keys()))
-
-# 选择节
 if selected_chapter:
-    selected_section = st.sidebar.selectbox(
-        "选择节",
-        list(CHAPTERS[selected_chapter].keys())
-    )
+    selected_section = st.sidebar.selectbox("选择节", list(CHAPTERS[selected_chapter].keys()))
+
+# ====== 辅助函数：获取当前模式的消息列表 ======
+def get_current_messages():
+    if mode == "概念讲解":
+        return st.session_state.concept_messages
+    elif mode == "练习模式":
+        return st.session_state.practice_messages
+    else:
+        return st.session_state.experiment_messages
 
 # ====== 交互实验模式 ======
 if mode == "交互实验":
@@ -117,7 +124,6 @@ if mode == "交互实验":
         "级数部分和收敛",
         "阻尼振动"
     ])
-
     if experiment == "方向导数和梯度":
         show_gradient_experiment()
     elif experiment == "多元函数极值":
@@ -133,36 +139,32 @@ if mode == "交互实验":
 elif mode == "概念讲解":
     if st.sidebar.button("🚀 开始图像化学习", type="primary"):
         prompt_text = CHAPTERS[selected_chapter][selected_section]
-        st.session_state.messages.append({"role": "user", "content": prompt_text})
+        st.session_state.concept_messages.append({"role": "user", "content": prompt_text})
         st.rerun()
 
-    # 主界面
     st.title("🎨 高数下册图像化学习助手")
     st.caption("专门适配图像化理解型学习者 —— 先图后公式，类比先行")
 
-    # 显示历史消息
-    for msg in st.session_state.messages:
+    # 显示历史消息（排除系统消息）
+    for msg in st.session_state.concept_messages:
         if msg["role"] != "system":
             with st.chat_message(msg["role"]):
-                st.markdown(msg["content"])
+                st.markdown(msg["content"], unsafe_allow_html=True)  # 允许 HTML 颜色
 
-    # 用户自由输入
     if prompt := st.chat_input("你也可以直接输入问题，比如：什么是方向导数？"):
-        st.session_state.messages.append({"role": "user", "content": prompt})
+        st.session_state.concept_messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
-
         with st.chat_message("assistant"):
             with st.spinner("正在生成视觉化讲解..."):
                 response = client.chat.completions.create(
                     model=MODEL,
-                    messages=st.session_state.messages,
+                    messages=st.session_state.concept_messages,
                     temperature=0.7,
                 )
                 reply = response.choices[0].message.content
-                st.markdown(reply)
-
-        st.session_state.messages.append({"role": "assistant", "content": reply})
+                st.markdown(reply, unsafe_allow_html=True)
+        st.session_state.concept_messages.append({"role": "assistant", "content": reply})
 
 # ====== 练习模式 ======
 else:  # mode == "练习模式"
@@ -171,41 +173,35 @@ else:  # mode == "练习模式"
             f"请根据{selected_section}的内容，生成一道练习题。"
             "要求：1）包含一个常见错误选项；"
             "2）用户回答后，你必须先明确标出错误类型，格式为：【错误类型：计算错误/理解错误/方法错误】；"
-            "3）然后用'颜色标记错误步骤'的文字方式给出针对性反馈；"
+            "3）然后用真正的 HTML 颜色标记错误步骤（例如 <span style='color:red;'>...</span>）给出针对性反馈；"
             "4）诊断完成后，出一道同类型的新题检验用户是否真正掌握。"
             "直接出题，不用讲解概念。"
         )
-        st.session_state.messages.append({"role": "user", "content": exercise_prompt})
+        st.session_state.practice_messages.append({"role": "user", "content": exercise_prompt})
         st.rerun()
 
-    # 主界面
     st.title("📝 高数下册练习模式")
     st.caption("AI 出题 → 你作答 → AI 诊断错误类型 → 针对性反馈 → 再练习")
 
-    # 显示历史消息
-    for msg in st.session_state.messages:
+    for msg in st.session_state.practice_messages:
         if msg["role"] != "system":
             with st.chat_message(msg["role"]):
-                st.markdown(msg["content"])
+                st.markdown(msg["content"], unsafe_allow_html=True)
 
-    # 用户自由输入
-    
-if prompt := st.chat_input('输入你的答案，或输入"来一道新题"...'):
-        st.session_state.messages.append({"role": "user", "content": prompt})
+    if prompt := st.chat_input('输入你的答案，或输入"来一道新题"...'):
+        st.session_state.practice_messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
-
         with st.chat_message("assistant"):
             with st.spinner("正在诊断..."):
                 response = client.chat.completions.create(
                     model=MODEL,
-                    messages=st.session_state.messages,
+                    messages=st.session_state.practice_messages,
                     temperature=0.7,
                 )
                 reply = response.choices[0].message.content
-                st.markdown(reply)
-
-        st.session_state.messages.append({"role": "assistant", "content": reply})
+                st.markdown(reply, unsafe_allow_html=True)
+        st.session_state.practice_messages.append({"role": "assistant", "content": reply})
 
 st.sidebar.divider()
 st.sidebar.caption("💡 概念讲解：先图后公式 | 练习模式：AI诊断错误类型 | 交互实验：动手感受数学")
