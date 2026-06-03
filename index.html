@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify/themes/vue.css">
     <link rel="stylesheet" href="custom.css">
     
-    <!-- 手动加载 MathJax（最稳定） -->
+    <!-- MathJax 3 配置（最简化） -->
     <script>
         MathJax = {
             tex: {
@@ -21,10 +21,18 @@
 <body>
     <div id="app">加载中...</div>
     <script>
+        // 定义一个通用的公式渲染函数
+        function renderMath() {
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise().catch(err => console.warn('MathJax渲染失败:', err));
+            }
+        }
+
+        // 方案1：Docsify 插件钩子
         window.$docsify = {
             name: '🎨 高数下册图像化学习助手',
             repo: 'https://github.com/psittacine2007/math-learning-assistant',
-            loadSidebar: false,      // 如需侧边栏改为 true，并创建 _sidebar.md
+            loadSidebar: false,   // 如需要侧边栏改为 true
             subMaxLevel: 3,
             search: {
                 placeholder: '搜索知识点...',
@@ -33,18 +41,24 @@
             },
             plugins: [
                 function(hook, vm) {
-                    // 每次页面切换完成后，重新渲染公式
+                    // 每次页面切换完成后执行
                     hook.doneEach(function() {
-                        // 确保 DOM 更新完成
-                        setTimeout(function() {
-                            if (window.MathJax && MathJax.typesetPromise) {
-                                MathJax.typesetPromise().catch(err => console.warn('MathJax错误:', err));
-                            }
-                        }, 300);
+                        // 延迟足够时间，确保新 DOM 已完全插入
+                        setTimeout(renderMath, 500);
                     });
                 }
             ]
-        }
+        };
+
+        // 方案2：监听 hash 变化（后备方案，确保切换页面后一定渲染）
+        window.addEventListener('hashchange', function() {
+            setTimeout(renderMath, 300);
+        });
+
+        // 页面完全加载后也渲染一次（针对初始加载）
+        window.addEventListener('load', function() {
+            setTimeout(renderMath, 500);
+        });
     </script>
     <script src="//cdn.jsdelivr.net/npm/docsify/lib/docsify.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
